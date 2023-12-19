@@ -9,10 +9,10 @@ const projectSchema = mongoose.Schema(
       type: String,
       require: (true, 'description must be required'),
     },
-    dueDate: {
-      type: String,
-      require: (true, 'dueDate must be required'),
-    },
+    // dueDate: {
+    //   type: String,
+    //   require: (true, 'dueDate must be required'),
+    // },
     status: {
       type: String,
       enum: ['pending', 'completed'],

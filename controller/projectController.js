@@ -79,8 +79,8 @@ const projectController = {
   edit: async (req, res) => {
     try {
       const id = req.params.id;
-      const { title, description, dueDate } = req.body;
-      const obj = { title, description, dueDate };
+      const { title, description, } = req.body;
+      const obj = { title, description, };
       const errArr = [];
       if (!obj.title) {
         errArr.push('Required title');
@@ -88,9 +88,9 @@ const projectController = {
       if (!obj.description) {
         errArr.push('Required description');
       }
-      if (!obj.dueDate) {
-        errArr.push('Required due date');
-      }
+      // if (!obj.dueDate) {
+      //   errArr.push('Required due date');
+      // }
       if (errArr.length > 0) {
         res
           .status(401)
