@@ -8,5 +8,6 @@ route.get('/', projectController.get),
 route.put('/:id', projectController.edit),
   route.put('/:id/markAsDone', projectController.markAsDone);
 route.delete('/:id', projectController.del);
+route.post('/assign', projectController.assignProject);
 
 module.exports = route;

@@ -1,22 +1,23 @@
 const { SendResponse } = require('../helpers/helpers');
 const projectsModel = require('../models/projectModel');
+const Team = require('../models/teamModel');
 
-const projectController = {
+const projectsController = {
   get: async (req, res) => {
     try {
-      let result = await projectsModel.find();
-      res.status(200).send(SendResponse(true, 'Data found !', result));
-    } catch (error) {
-      res.send(SendResponse(false, 'Data not found !', error));
+      let { pageNo, pageSize } = req.query;
+      let skipCount = (pageNo - 1) * pageSize;
+      let result = await projectsModel.find().limit(pageSize).skip(skipCount);
+      res.status(200).send(SendResponse(true, '', result));
+    } catch (e) {
+      res.status(500).send(SendResponse(false, 'Internal Server Error', e));
     }
   },
   getbyid: async (req, res) => {
     try {
       let id = req.params.id;
       let result = await projectsModel.findById(id);
-      res
-        .status(200)
-        .send(SendResponse(true, 'project finded successfully !', result));
+      res.status(200).send(SendResponse(true, '', result));
     } catch (e) {
       res.status(500).send(SendResponse(false, 'Internal Server Error', e));
     }
@@ -25,9 +26,9 @@ const projectController = {
     try {
       let { title, description, dueDate } = req.body;
       let obj = { dueDate, description, title };
-      // errors should be in this array
+
       let errArr = [];
-      //  error handling
+
       if (!obj.dueDate) {
         errArr.push('Required dueDate');
       }
@@ -65,7 +66,7 @@ const projectController = {
       let projectId = req.params.id;
       const project = await projectsModel.findByIdAndUpdate(
         projectId,
-        { status: 'completed' },
+        { projectStatus: 'completed' },
         { new: true }
       );
       if (!project) {
@@ -79,8 +80,8 @@ const projectController = {
   edit: async (req, res) => {
     try {
       const id = req.params.id;
-      const { title, description, } = req.body;
-      const obj = { title, description, };
+      const { title, description, dueDate } = req.body;
+      const obj = { title, description, dueDate };
       const errArr = [];
       if (!obj.title) {
         errArr.push('Required title');
@@ -88,9 +89,9 @@ const projectController = {
       if (!obj.description) {
         errArr.push('Required description');
       }
-      // if (!obj.dueDate) {
-      //   errArr.push('Required due date');
-      // }
+      if (!obj.dueDate) {
+        errArr.push('Required due date');
+      }
       if (errArr.length > 0) {
         res
           .status(401)
@@ -114,6 +115,43 @@ const projectController = {
       res.status(404).send(SendResponse(false, error, null));
     }
   },
+  assignProject: async (req, res) => {
+    try {
+        const { title, description, dueDate, team, } = req.body;
+        const checkTeam = await Team.findById(team);
+        if (!checkTeam) {
+            return res.status(404).json({
+                success: false,
+                message: 'Team not found',
+            });
+        }
+        const newTask = await projectsModel.create({
+            title,
+            description,
+            dueDate,
+            team,
+        });
+
+        // Update team ke tasks array mein newTask ko push karein
+        await Team.findByIdAndUpdate(team, { $push: { projects: newTask } });
+
+        // Update user ke tasks array mein newTask ko push karein
+        return res.status(201).json({
+            success: true,
+            message: 'Task successfully assign kiya gaya hai',
+            task: newTask,
+        });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            message: 'Task assign karne mein kuch problem aayi hai',
+            error: error.message,
+        });
+    }
+},
 };
 
-module.exports = projectController;
+//  one api will be remain
+
+module.exports = projectsController;

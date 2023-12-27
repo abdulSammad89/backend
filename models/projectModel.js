@@ -1,29 +1,30 @@
-const mongoose = require('mongoose');
-const projectSchema = mongoose.Schema(
-  {
+const mongoose = require("mongoose")
+
+const projectsSchema = mongoose.Schema({
     title: {
-      type: String,
-      require: (true, 'title must be required'),
+        type: String,
+        required: true
     },
     description: {
-      type: String,
-      require: (true, 'description must be required'),
+        type: String,
+        required: true
     },
-    // dueDate: {
-    //   type: String,
-    //   require: (true, 'dueDate must be required'),
-    // },
-    status: {
-      type: String,
-      enum: ['pending', 'completed'],
-      default: 'pending',
+    dueDate: {
+        type: String,
+        required: true
     },
-  },
-  {
-    timestamps: true,
-  }
-);
+    projectStatus: {
+        type: String,
+        enum: ['pending', 'completed'],
+        default: 'pending'
+    },
+    team:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Team"
+    },
+}, {
+    timestamps: true
+})
 
-const projectModel = mongoose.model('projects', projectSchema);
-
-module.exports = projectModel;
+const projectsModel = mongoose.model("projects", projectsSchema)
+module.exports = projectsModel
